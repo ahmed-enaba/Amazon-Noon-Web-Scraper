@@ -5,26 +5,26 @@ from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import time
 import csv
-from tkinter import *
 
+item_detalils=[]
+item_detalils2=[]
 
-#about=input("Enter what do you want to serch about")
+about=input("Enter what do you want to search about: ")
 
-
+url="https://www.amazon.eg"
+url2=f"https://www.noon.com/egypt-en/search/?q={about}"
 
 def amazon(link):
     service=Service(ChromeDriverManager().install())
     browser=webdriver.Chrome(service=service)
     browser.get(link)
+    time.sleep(5)
 
     search_bar=browser.find_element('id','twotabsearchtextbox')
-    keyword=label.get().strip()
-    search_bar.send_keys(keyword)
-    time.sleep(5)
-
+    search_bar.send_keys(about)
     search=browser.find_element('id','nav-search-submit-button').click()
     items = browser.find_elements(By.XPATH, "//div[@data-component-type='s-search-result']")
-    time.sleep(5)
+    time.sleep(10)
 
     for item in items:
         html_code=item.get_attribute("outerHTML")
@@ -60,20 +60,19 @@ def amazon(link):
     browser.quit()
     
 
+amazon(url)
 
 
-def noon():
+def noon(link):
     service=Service(ChromeDriverManager().install())
     browser=webdriver.Chrome(service=service)
-    keyword=label.get()
-    url2=f"https://www.noon.com/egypt-en/search/?q={keyword}"
-    browser.get(url2)
+    browser.get(link)
     time.sleep(5)
     items=browser.find_elements(By.XPATH,"//div[@class='PBoxLinkHandler-module-scss-module__WvRpgq__linkWrapper']")
     
     for item in items:
         try:
-            item_name=item.find_element(By.XPATH,".//h2[@class='ProductDetailsSection-module-scss-module__Y6u1Qq__title ProductDetailsSection-module-scss-module__Y6u1Qq__isPboxRedesignEnabled']").text
+            item_name=item.find_element(By.XPATH,".//h2[@class='ProductDetailsSection-module-scss-module__Y6u1Qq__title']").text
         except:
             item_name=" "
 
@@ -91,14 +90,17 @@ def noon():
             item_link=item.find_element(By.XPATH,".//a").get_attribute("href")
         except:
             item_link="item is finished"
-        
+
         item_detalils2.append({
             'item name':item_name,
             'price':item_price,
             'link':item_link,
             'rate':item_rate
         })
-    browser.quit()
+
+
+noon(url2)
+
 
 
 def making_file():
@@ -112,31 +114,4 @@ def making_file():
         dict_writer.writerow(stars_row) 
         dict_writer.writerows(item_detalils2)
         print("csv file created successfuly")
-        window.destroy()
-
-
-
-item_detalils=[]
-item_detalils2=[]
-
-
-window=Tk()
-window.title('buy overview')
-window.geometry('600x700')
-window.config(background= "gray81")
-
-label=Entry(window,width=60)
-label.place(x=120,y=60)
-
-
-url="https://www.amazon.eg"
-run=Button(window,text="go",activeforeground='SteelBlue3',command=lambda: [amazon(url),noon(),making_file()])
-run.place(x=150,y=130)
-
-
-window.mainloop()
-
-
-
-
-
+making_file()
